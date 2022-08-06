@@ -77,7 +77,6 @@
                         id: id,
                         status: status.innerText
                     }).then(res => {
-                    console.log(res);
                             if (res.data.result === 'active') {
                                 status.innerText = 'active';
                                 status.classList.remove('text-red-800', 'bg-red-100');
@@ -93,33 +92,4 @@
                         });
                 });
             });
-
-
-// //send axios request to update status
-//         status.addEventListener('click', (e) => {
-//             const id = e.target.parentElement.parentElement.firstElementChild.innerText;
-//             const status = e.target.innerText;
-//             console.log(id, status);
-//             axios.post('/api/v1/admin/update-status', {
-//                 id,
-//                 status
-//             })
-//                 .then(res => {
-//                     console.log(res);
-//                     if (res.data.result == 'active') {
-//                         e.target.innerText = 'active';
-//                         e.target.classList.remove('bg-red-100');
-//                         e.target.classList.add('bg-green-100');
-//                     } else if (res.data.result == 'inactive') {
-//                         e.target.innerText = 'inactive';
-//                         e.target.classList.remove('bg-green-100');
-//                         e.target.classList.add('bg-red-100');
-//                     }
-//                 })
-//                 .catch(err => {
-//                     console.log(err);
-//                 });
-//         });
-
-
         </script>
