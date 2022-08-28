@@ -145,7 +145,7 @@ if ($action == "create-domain") {
       <memory unit='$memory_unit'>$memory</memory>
       <vcpu>$vcpu</vcpu>
       <os>
-      <type arch='x86_64' machine='pc-q35-5.1'>hvm</type>
+      <type>hvm</type>
       <boot dev='hd'/>
           <boot dev='cdrom'/>
           <boot dev='network'/>
@@ -179,9 +179,6 @@ if ($action == "create-domain") {
           <memballoon model='virtio'>
               <stats period='10'/>
           </memballoon>
-          <tpm model='tpm-tis'>
-            <backend type='emulator' version='2.0'/>
-          </tpm>
       </devices>
       </domain>";
     }
