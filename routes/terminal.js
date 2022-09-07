@@ -26,14 +26,14 @@ router.post('/wssh', (req, res) => {
             error: error.toString()
         });
     });
-    // child.on('exit', (code, signal) => {
-    //     if (code) {
-    //         console.log(`child process exited with code ${code}`);
-    //     }
-    //     if (signal) {
-    //         console.log(`child process exited with signal ${signal}`);
-    //     }
-    // });
+    child.on('exit', (code, signal) => {
+        if (code) {
+            console.log(`child process exited with code ${code}`);
+        }
+        if (signal) {
+            console.log(`child process exited with signal ${signal}`);
+        }
+    });
 
 });
 module.exports = router;

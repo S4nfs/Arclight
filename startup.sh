@@ -114,13 +114,13 @@ adduser www-data libvirt
 cd /var/www/html
 echo -e "${green}Getting the latest version of arclight...${clear}"
 sleep 4
-wget https://github.com/Chatnaut/Arclight/archive/refs/tags/v2.0.0.tar.gz
+wget https://github.com/Chatnaut/Arclight/archive/refs/tags/v2.0.1.tar.gz
 echo -e "${green}Extracting the archive...${clear}"
-tar -xzf v2.0.0.tar.gz && mv Arclight-2.0.0 arclight
+tar -xzf v2.0.1.tar.gz && mv Arclight-2.0.1 arclight
 chown -R www-data:www-data /var/www/html/arclight
 
 #Setup PM2 process manager to keep your api running
-echo -e "${green}Setting-up Arc API...${clear}"
+echo -e "${green}Setting-up the Arc API...${clear}"
 curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
 apt install nodejs
 npm i pm2 -g
