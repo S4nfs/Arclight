@@ -116,7 +116,7 @@ echo -e "${green}Getting the latest version of arclight...${clear}"
 sleep 4
 wget https://github.com/Chatnaut/Arclight/archive/refs/tags/v2.0.1.tar.gz
 echo -e "${green}Extracting the archive...${clear}"
-tar -xzf v2.0.1.tar.gz && mv Arclight-2.0.1 arclight
+tar -xzf v2.0.1.tar.gz && mv Arclight-2.0.1 arclight && rm v2.0.1.tar.gz
 chown -R www-data:www-data /var/www/html/arclight
 
 #Setup PM2 process manager to keep your api running
