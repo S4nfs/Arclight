@@ -1,6 +1,6 @@
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
-const {User} = require('../models/user.model');
+const { User } = require('../models/user.model');
 
 const passportJWT = require("passport-jwt");
 const JWTStrategy = passportJWT.Strategy;
@@ -16,7 +16,7 @@ passport.use(
             if (!user) {
                 return done(null, false, { message: "Username/Email not registered" }) //error, usernameexists, message
             }
-            if(user.status === 'inactive') {
+            if (user.status === 'inactive') {
                 return done(null, false, { message: 'Only members are authorized to login' });
             }
             //email exists let's verify the password and assign jwt token
@@ -45,14 +45,14 @@ passport.deserializeUser(function (id, done) {
 })
 
 
-//JWT Authentication middleware using passport and continue to next middleware
+//JWT Authentication middleware using passport for API internal routes only requiring JWT token verification
 passport.use(
     new JWTStrategy({
         jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
         secretOrKey: process.env.AUTH_KEY
     }, async (jwt_payload, done) => {
         try {
-            console.log(jwt_payload);
+            // console.log(jwt_payload);
             const user = await User.findById(jwt_payload.user
                 ._id);
             if (!user) {

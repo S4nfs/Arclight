@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 3000;
 const passport = require('passport')
 const mongoose = require('mongoose');
 const MongoStore = require('connect-mongo');// https://www.npmjs.com/package/express-session#compatible-session-stores [FROM expression-session package for persistent session storage after server reboots]
-const {ensureLoggedIn} = require('connect-ensure-login');
+const { ensureLoggedIn } = require('connect-ensure-login');
 const { roles } = require('./utils/constants');
 const cors = require('cors');
 const app = express();
@@ -59,15 +59,15 @@ app.use('/', require('./routes/config.route'));
 app.use('/v1/auth', require('./routes/auth.route'));
 
 app.use('/v1/profile', require('./routes/profile.route'));
-app.use('/v1/admin', require('./routes/admin.route'));
-app.use('/v1/user', passport.authenticate('jwt', {session: false}), ensureAdmin, require('./routes/user.route'));
+app.use('/v1/admin', passport.authenticate('jwt', { session: false }), ensureAdmin, require('./routes/admin.route'));
+app.use('/v1/user', passport.authenticate('jwt', { session: false }), ensureAdmin, require('./routes/user.route'));
 
 app.use("/v1/status", require('./routes/api_health'));
 app.use("/v1/terminal", require('./routes/terminal'));
-app.use("/v1/config",passport.authenticate('jwt', {session: false}), require('./routes/config.route'));
+app.use("/v1/config", passport.authenticate('jwt', { session: false }), require('./routes/config.route'));
 app.use('/v1/event', require('./routes/event.route'));
 app.use('/v1/logs', require('./routes/log.route'));
-app.use('/v1/instance', passport.authenticate('jwt', {session: false}), require('./routes/instance.route'));
+app.use('/v1/instance', passport.authenticate('jwt', { session: false }), require('./routes/instance.route'));
 
 
 //404 handler
