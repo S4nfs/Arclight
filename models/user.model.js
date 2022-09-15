@@ -51,7 +51,7 @@ UserSchema.methods.isvalidPassword = async function (password) {
         const hashedPassword = this.password.replace("$2y$", "$2b$");
         return await bcrypt.compare(password, hashedPassword);
     } catch (error) {
-        throw creteHttpError.InternalServerError(error.message);
+        throw createHttpError.InternalServerError(error.message);
     }
 }
 const User = mongoose.model('arclight_user', UserSchema);
