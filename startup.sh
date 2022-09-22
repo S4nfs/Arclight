@@ -34,8 +34,23 @@ set -eu -o pipefail # fail on error and report it, debug all lines
 sudo -n true
 test $? -eq 0 || exit 1 "You should have sudo privilege to run this script"
 
+#package manager 
+declare -A osInfo;
+osInfo[/etc/debian_version]="apt install -y"
+osInfo[/etc/alpine-release]="apk --update add"
+osInfo[/etc/redhat-release]="yum install -y"
+osInfo[/etc/centos-release]="yum install -y"
+osInfo[/etc/fedora-release]="dnf install -y"
+
+for f in ${!osInfo[@]}
+do
+    if [[ -f $f ]];then
+        package_manager=${osInfo[$f]}
+    fi
+done
+
 echo -e "${green}Installing pre-requisites${clear}"
-while read -r p; do sudo apt install -y "$p"; done < <(
+while read -r p; do ${package_manager} "$p"; done < <(
     cat <<"EOF"
     curl
     wget
@@ -56,7 +71,24 @@ while read -r p; do sudo apt install -y "$p"; done < <(
     php-libvirt-php
 EOF
 )
+
 #install the following packages according to the linux distro
+if type lsb_release >/dev/null 2>&1; then
+    distro=$(lsb_release -i -s)
+elif [ -e /etc/os-release ]; then
+    distro=$(awk -F= '$1 == "ID" {print $2}' /etc/os-release)
+elif [ -e /etc/some-other-release-file ]; then
+    distro=$(unknown)
+fi
+
+# convert to lowercase
+distro=$(printf '%s\n' "$distro" | LC_ALL=C tr '[:upper:]' '[:lower:]' | sed -r 's/^"|"$//g')
+
+# now do different things depending on distro
+case "$distro" in
+debian*) commands-for-debian ;;
+centos*) commands-for-centos ;;
+ubuntu*) 
 if [ "$(lsb_release -a | grep -c 20.04)" -eq 2 ]; then
     echo -e "${green}Working on MongoDB Database${clear}"
     apt install php-dev php-pear -y
@@ -64,7 +96,7 @@ if [ "$(lsb_release -a | grep -c 20.04)" -eq 2 ]; then
     pecl install mongodb    
     echo -e "\n; MongoDB PHP driver\nextension=mongodb.so" | sudo tee -a /etc/php/7.4/apache2/php.ini
     echo -e "${green}Installing packages for Ubuntu 20.04${clear}"
-    while read -r p; do sudo apt install -y "$p"; done < <(
+    while read -r p; do ${package_manager} "$p"; done < <(
         cat <<"EOF"
     python3
     python3-pip
@@ -73,7 +105,7 @@ EOF
 
 elif [ "$(lsb_release -a | grep -c 18.04)" -eq 2 ]; then
     echo -e "${green}Installing packages for Ubuntu 18.04${clear}"
-    while read -r p; do sudo apt install -y "$p"; done < <(
+    while read -r p; do ${package_manager} "$p"; done < <(
         cat <<"EOF"
     mongodb
     php-mongodb
@@ -94,7 +126,7 @@ elif [ "$(lsb_release -a | grep -c 22.04)" -eq 2 ]; then
     pecl install mongodb
     echo -e "\n; MongoDB PHP driver\nextension=mongodb.so" | sudo tee -a /etc/php/8.1/apache2/php.ini
     echo -e "${green}Installing packages for for Ubuntu 22.04${clear}"
-    while read -r p; do sudo apt install -y "$p"; done < <(
+    while read -r p; do ${package_manager} "$p"; done < <(
         cat <<"EOF"
     python3
     python3-pip
@@ -103,7 +135,15 @@ EOF
 else
     echo -e "${red}Arclight ERROR: ${bg_red}Arclight is not supported on this Linux distribution${clear}"
     exit 1
-fi
+fi ;;
+mint*) commands-for-mint ;;
+rhel*) commands-for-rhel ;;
+?)
+    echo "Arclight is not supported in '$distro'"
+    exit 1
+    ;;
+esac
+
 
 pip install webssh
 
