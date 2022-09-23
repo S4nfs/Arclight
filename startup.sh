@@ -50,6 +50,32 @@ do
 done
 
 echo -e "${green}Installing pre-requisites${clear}"
+
+
+#install the following packages according to the linux distro
+if type lsb_release >/dev/null 2>&1; then
+    distro=$(lsb_release -i -s)
+elif [ -e /etc/os-release ]; then
+    distro=$(awk -F= '$1 == "ID" {print $2}' /etc/os-release)
+elif [ -e /etc/some-other-release-file ]; then
+    distro=$(unknown)
+fi
+
+# convert to lowercase
+distro=$(printf '%s\n' "$distro" | LC_ALL=C tr '[:upper:]' '[:lower:]' | sed -r 's/^"|"$//g')
+
+case "$distro" in
+debian*) #DEBIAN----------------------------------------------------------------------------------------------
+    echo -e "${red}Arclight ERROR: ${bg_red}Arclight is not supported on this Linux distribution${clear}"
+    exit 1
+fi
+;;
+centos*) #CENTOS----------------------------------------------------------------------------------------------
+    echo -e "${red}Arclight ERROR: ${bg_red}Arclight is not supported on this Linux distribution${clear}"
+    exit 1
+fi
+;;
+ubuntu*) #UBUNTU----------------------------------------------------------------------------------------------
 while read -r p; do ${package_manager} "$p"; done < <(
     cat <<"EOF"
     curl
@@ -72,23 +98,6 @@ while read -r p; do ${package_manager} "$p"; done < <(
 EOF
 )
 
-#install the following packages according to the linux distro
-if type lsb_release >/dev/null 2>&1; then
-    distro=$(lsb_release -i -s)
-elif [ -e /etc/os-release ]; then
-    distro=$(awk -F= '$1 == "ID" {print $2}' /etc/os-release)
-elif [ -e /etc/some-other-release-file ]; then
-    distro=$(unknown)
-fi
-
-# convert to lowercase
-distro=$(printf '%s\n' "$distro" | LC_ALL=C tr '[:upper:]' '[:lower:]' | sed -r 's/^"|"$//g')
-
-# now do different things depending on distro
-case "$distro" in
-debian*) commands-for-debian ;;
-centos*) commands-for-centos ;;
-ubuntu*) 
 if [ "$(lsb_release -a | grep -c 20.04)" -eq 2 ]; then
     echo -e "${green}Working on MongoDB Database${clear}"
     apt install php-dev php-pear -y
@@ -136,10 +145,40 @@ else
     echo -e "${red}Arclight ERROR: ${bg_red}Arclight is not supported on this Linux distribution${clear}"
     exit 1
 fi ;;
-mint*) commands-for-mint ;;
-rhel*) commands-for-rhel ;;
+
+mint*) #RHEL----------------------------------------------------------------------------------------------
+     echo -e "${red}Arclight ERROR: ${bg_red}Arclight is not supported on this Linux distribution${clear}"
+    exit 1
+fi
+ ;;
+
+rhel*) #RHEL----------------------------------------------------------------------------------------------
+while read -r p; do ${package_manager} "$p"; done < <(
+    cat <<"EOF"
+    curl
+    wget
+    
+    qemu-kvm
+    qemu-img
+    libvirt
+    virt-install
+    libvirt-client
+    bridge-utils
+    xauth
+    zip
+    unzip
+
+    httpd 
+    php
+    php-xml
+    php-libvirt-php
+EOF
+)
+libvirt libvirt-python libguestfs-tools virt-install
+;;
+
 ?)
-    echo "Arclight is not supported in '$distro'"
+    echo -e "${red}Arclight ERROR: ${bg_red}Arclight is not supported on this Linux distribution${clear}"
     exit 1
     ;;
 esac
