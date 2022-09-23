@@ -43,7 +43,7 @@ require('./utils/passport.auth');
 
 app.use((req, res, next) => {
     res.locals.user = req.user;
-    console.log(`OUPUT: ${res.locals.user}`)
+    console.log(`OUPUT: ${req}`)
     next();
 })
 
@@ -59,7 +59,7 @@ app.use('/', require('./routes/config.route'));
 app.use('/v1/auth', require('./routes/auth.route'));
 
 app.use('/v1/profile', require('./routes/profile.route'));
-app.use('/v1/admin', passport.authenticate('jwt', { session: false }), ensureAdmin, require('./routes/admin.route'));
+app.use('/v1/admin', ensureLoggedIn({ redirectTo: '/pages/sign-in' }), require('./routes/admin.route'));
 app.use('/v1/user', passport.authenticate('jwt', { session: false }), ensureAdmin, require('./routes/user.route'));
 
 app.use("/v1/status", require('./routes/api_health'));
