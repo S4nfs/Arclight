@@ -70,7 +70,7 @@ EOF
 if type lsb_release >/dev/null 2>&1; then
     distro=$(lsb_release -i -s)
 elif [ -e /etc/os-release ]; then
-    distro=$(awk -F= '$1 == "ID" {print $2}' /etc/os-release)
+    distro=$(awk -F= '$1 == "ID" {print $2}' /etc/*release)
 elif [ -e /etc/some-other-release-file ]; then
     distro=$(unknown)
 fi
@@ -115,7 +115,7 @@ if [ "$(lsb_release -a | grep -c 20.04)" -eq 2 ]; then
     python3-pip
 EOF
     )
-
+ln -s /usr/bin/python3 /usr/bin/python
 elif [ "$(lsb_release -a | grep -c 18.04)" -eq 2 ]; then
     echo -e "${green}Installing packages for Ubuntu 18.04${clear}"
     while read -r p; do ${package_manager} "$p"; done < <(
@@ -145,6 +145,7 @@ elif [ "$(lsb_release -a | grep -c 22.04)" -eq 2 ]; then
     python3-pip
 EOF
     )
+    ln -s /usr/bin/python3 /usr/bin/python
 else
     echo -e "${red}Arclight ERROR: ${bg_red}Arclight is not supported on this Linux distribution${clear}"
     exit 1
@@ -245,20 +246,14 @@ else
     echo -e "${green}Restarting only the required services in order to apply changes...${clear}"
     sleep 3
     service apache2 restart
-    if [ "$(lsb_release -a | grep -c 20.04)" -eq 2 ]; then
+    if [ "$(grep -Ei 'debian|ubuntu' /etc/*release)" ]; then
+        service apache2 restart
         service mongodb restart
-        ln -s /usr/bin/python3 /usr/bin/python
-    elif [ "$(lsb_release -a | grep -c 18.04)" -eq 2 ]; then
-        service mongodb restart
-    elif [ "$(lsb_release -a | grep -c 22.04)" -eq 2 ]; then
-        service mongod start
-        ln -s /usr/bin/python3 /usr/bin/python
     elif [ "$(grep -Ei 'rhel|fedora|centos' /etc/*release)" ]; then
-    systemctl restart httpd
-    systemctl restart mongod
-    systemctl enable mongod
+        systemctl restart httpd
+        systemctl restart mongod
+        systemctl enable mongod
     fi
-
     echo "Bye!"
     exit 0
 fi
