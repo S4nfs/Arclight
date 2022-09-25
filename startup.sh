@@ -50,7 +50,21 @@ do
 done
 
 echo -e "${green}Installing pre-requisites${clear}"
+while read -r p; do ${package_manager} "$p"; done < <(
+    cat <<"EOF"
+    curl
+    wget
+    
+    qemu-kvm
+    bridge-utils
+    xauth
+    zip
+    unzip
 
+    php
+    php-xml
+EOF
+)
 
 #install the following packages according to the linux distro
 if type lsb_release >/dev/null 2>&1; then
@@ -78,22 +92,12 @@ fi
 ubuntu*) #UBUNTU----------------------------------------------------------------------------------------------
 while read -r p; do ${package_manager} "$p"; done < <(
     cat <<"EOF"
-    curl
-    wget
-    
-    qemu-kvm
     libvirt-daemon-system
     libvirt-clients
-    bridge-utils
-    xauth
-    zip
-    unzip
 
     apache2 
     lsb-core
-    php
     libapache2-mod-php
-    php-xml
     php-libvirt-php
 EOF
 )
@@ -146,7 +150,7 @@ else
     exit 1
 fi ;;
 
-mint*) #RHEL----------------------------------------------------------------------------------------------
+mint*) #MINT----------------------------------------------------------------------------------------------
      echo -e "${red}Arclight ERROR: ${bg_red}Arclight is not supported on this Linux distribution${clear}"
     exit 1
 fi
@@ -155,26 +159,30 @@ fi
 rhel*) #RHEL----------------------------------------------------------------------------------------------
 while read -r p; do ${package_manager} "$p"; done < <(
     cat <<"EOF"
-    curl
-    wget
-    
-    qemu-kvm
+
     qemu-img
     libvirt
     virt-install
     libvirt-client
-    bridge-utils
-    xauth
-    zip
-    unzip
+
 
     httpd 
-    php
-    php-xml
     php-libvirt-php
 EOF
 )
 libvirt libvirt-python libguestfs-tools virt-install
+    echo -e "${green}Working on MongoDB Database${clear}"
+    yum -y update
+    echo "[mongodb-org-4]
+name=MongoDB Repository
+baseurl=https://repo.mongodb.org/yum/redhat/8/mongodb-org/4.4/x86_64/
+gpgcheck=1
+enabled=1
+gpgkey=https://www.mongodb.org/static/pgp/server-4.4.asc" | sudo tee -a /etc/yum.repos.d/mongodb-org-4.repo
+    yum install mongodb-org gcc php-pear php-devel -y
+    pecl install mongodb
+    echo -e "\n; MongoDB PHP driver\nextension=mongodb.so" | sudo tee -a /etc/php/php.ini
+    yum install python2-pip
 ;;
 
 ?)
@@ -245,6 +253,10 @@ else
     elif [ "$(lsb_release -a | grep -c 22.04)" -eq 2 ]; then
         service mongod start
         ln -s /usr/bin/python3 /usr/bin/python
+    elif [ "$(grep -Ei 'rhel|fedora|centos' /etc/*release)" ]; then
+    systemctl restart httpd
+    systemctl restart mongod
+    systemctl enable mongod
     fi
 
     echo "Bye!"
