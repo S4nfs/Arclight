@@ -115,7 +115,8 @@ if [ "$(lsb_release -a | grep -c 20.04)" -eq 2 ]; then
     python3-pip
 EOF
     )
-ln -s /usr/bin/python3 /usr/bin/python
+    pip install webssh
+    ln -s /usr/bin/python3 /usr/bin/python
 elif [ "$(lsb_release -a | grep -c 18.04)" -eq 2 ]; then
     echo -e "${green}Installing packages for Ubuntu 18.04${clear}"
     while read -r p; do ${package_manager} "$p"; done < <(
@@ -126,6 +127,7 @@ elif [ "$(lsb_release -a | grep -c 18.04)" -eq 2 ]; then
     python-pip
 EOF
     )
+    pip install webssh
 elif [ "$(lsb_release -a | grep -c 22.04)" -eq 2 ]; then
     echo -e "${green}Working on MongoDB Database${clear}"
     sudo apt update -y
@@ -145,6 +147,7 @@ elif [ "$(lsb_release -a | grep -c 22.04)" -eq 2 ]; then
     python3-pip
 EOF
     )
+    pip install webssh
     ln -s /usr/bin/python3 /usr/bin/python
 else
     echo -e "${red}Arclight ERROR: ${bg_red}Arclight is not supported on this Linux distribution${clear}"
@@ -184,6 +187,7 @@ gpgkey=https://www.mongodb.org/static/pgp/server-4.4.asc" | sudo tee -a /etc/yum
     pecl install mongodb
     echo -e "\n; MongoDB PHP driver\nextension=mongodb.so" | sudo tee -a /etc/php/php.ini
     yum install python2-pip
+    pip2 install webssh
 ;;
 
 ?)
@@ -192,8 +196,6 @@ gpgkey=https://www.mongodb.org/static/pgp/server-4.4.asc" | sudo tee -a /etc/yum
     ;;
 esac
 
-
-pip install webssh
 
 #Configuring files and permissions
 echo -e "${green}Configuring files and permissions...${clear}"
@@ -245,7 +247,6 @@ if [ $reboot = "y" ]; then
 else
     echo -e "${green}Restarting only the required services in order to apply changes...${clear}"
     sleep 3
-    service apache2 restart
     if [ "$(grep -Ei 'debian|ubuntu' /etc/*release)" ]; then
         service apache2 restart
         service mongodb restart
