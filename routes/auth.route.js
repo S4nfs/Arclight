@@ -1,13 +1,14 @@
 const router = require('express').Router();
-const {User} = require('../models/user.model');
+const { User } = require('../models/user.model');
 const { body, validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
 const { ensureLoggedIn, ensureLoggedOut } = require('connect-ensure-login');
 
 router.post('/login', function (req, res, next) {
-    passport.authenticate('local', { session: false,
-     }, (err, user, info) => {
+    passport.authenticate('local', {
+        session: false,
+    }, (err, user, info) => {
         if (err || !user) {
             req.flash('error', info.message)
             return res.status(400).json({
@@ -29,7 +30,7 @@ router.post('/login', function (req, res, next) {
             // generate a token for the user
             const token = jwt.sign({ user }, process.env.AUTH_KEY, { expiresIn: '5h' });
             req.flash('success', "User logged in successfully")
-            return res.status(200).json({ 
+            return res.status(200).json({
                 success: 1,
                 message: req.flash(),
                 user: user,
@@ -81,19 +82,45 @@ router.post('/register', ensureLoggedOut({ redirectTo: '/' }), [
             success: 1,
             message: req.flash(),
         });
-        
+
         // res.send(user); //sending user object to frontend
     } catch (error) {
         next(error)
     }
 })
 
-router.post('/logout', ensureLoggedIn({ redirectTo: '/' }), async (req, res, next) => {
-    req.logout();
+router.get('/logout', async (req, res, next) => {
     req.session.destroy();
-    res.redirect('/auth/login');
+    res.redirect('/pages/sign-in');
 })
 
+router.get('/ca', checkAuthentication, function (req, res) {
+    //for debugging purpose
+});
+
+function checkAuthentication(req, res, next) {
+    if (req.isAuthenticated()) {
+        res.send("You are Authenticated")
+        next();
+    } else {
+        res.send("You are Not Authenticated")
+    }
+}
+
+// passport.setAuthenticatedUser = async function (req, res, next) {
+//     if (req.isAuthenticated()) {
+//         res.locals.user = await User.findById(req.user, function (err, user) {
+//             if (err) {
+//                 console.log('Error in finding user --> Passport');
+//             }
+//             console.log(`OUTPUITYUIIU ${res.locals.user}`)
+//             return;
+//         });
+//     }
+
+//     next();
+
+// }
 module.exports = router;
 
 // //my custom function to avoid user to unauthorised sessions routes [replaced with connectEnsure plugin]
